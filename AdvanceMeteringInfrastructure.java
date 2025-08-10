@@ -59,7 +59,7 @@ public class AdvanceMeteringInfrastructure {
 
             CloudSim.init(num_user, calendar, trace_flag);
 
-            String appId = "PrecisionAgricultureQualityControlApplication"; // identifier of the application
+            String appId = "AdvanceMeteringInfrastructureApplication"; // identifier of the application
 
             FogBroker broker = new FogBroker("broker");
 
@@ -81,8 +81,8 @@ public class AdvanceMeteringInfrastructure {
                     moduleMapping.addModuleToDevice("electric-frequency-sensing", device.getName());  // fixing 1 instance of the frequencySensor sensing module
                 }
 
-                if (device.getName().startsWith("b")) { // names of all HUMIDITY Sensor devices start with 'b'
-                    moduleMapping.addModuleToDevice("electricity-usage", device.getName());  // fixing 1 instance of the motion detection module
+                if (device.getName().startsWith("b")) { // names of all ELECTRICITY Sensor devices start with 'b'
+                    moduleMapping.addModuleToDevice("electricity-usage", device.getName());  // fixing 1 instance of the electricity detection module
                 }
 
                 if (device.getName().startsWith("p")) { // names of all Water Sensor devices start with 'p'
@@ -90,12 +90,12 @@ public class AdvanceMeteringInfrastructure {
                 }
 
                 if (device.getName().startsWith("f")) { // names of all AnalogValueMeter devices start with 'f'
-                    moduleMapping.addModuleToDevice("analog-value-usage", device.getName());  // fixing 1 instance of the impact detection module
+                    moduleMapping.addModuleToDevice("analog-value-usage", device.getName());  // fixing 1 instance of the analogValue detection module
                 }
 
             }
 
-            moduleMapping.addModuleToDevice("smart-meter-analytics", "cloud"); // fixing instances of quality assessment module in the Cloud
+            moduleMapping.addModuleToDevice("smart-meter-analytics", "cloud"); // fixing instances of smart meter assessment module in the Cloud
             if (CLOUD) {
                 // if the mode of deployment is cloud-based
                 moduleMapping.addModuleToDevice("analog-value-usage", "cloud");
@@ -119,7 +119,7 @@ public class AdvanceMeteringInfrastructure {
 
             CloudSim.stopSimulation();
 
-            Log.printLine("Precision Agriculture Quality Control Simulation Finished!");
+            Log.printLine("Advanced Metering Infrastructure Simulation Finished!");
         } catch (Exception e) {
             e.printStackTrace();
             Log.printLine("Unwanted errors happen");
@@ -156,18 +156,18 @@ public class AdvanceMeteringInfrastructure {
             fogDevices.add(pulse);
         }
 
-        FogDevice motionDetection = addElectricityFogDevice(id, router.getId());
-        motionDetection.setUplinkLatency(2); // latency of connection between HUMIDITY sensor and router is 2 ms
-        motionDetection.setParentId(router.getId());
+        FogDevice electricityDetection = addElectricityFogDevice(id, router.getId());
+        electricityDetection.setUplinkLatency(2); // latency of connection between ELECTRICITY sensor and router is 2 ms
+        electricityDetection.setParentId(router.getId());
         for (int i = 0; i < numOfElectricitySensors; i++) {
             String mobileId = id + "-" + i;
-            addElectricitySensor(mobileId, userId, appId, router.getId(), motionDetection); // adding a HUMIDITY sensor to the physical topology
+            addElectricitySensor(mobileId, userId, appId, router.getId(), electricityDetection); // adding a ELECTRICITY sensor to the physical topology
         }
-        fogDevices.add(motionDetection);
+        fogDevices.add(electricityDetection);
 
         Actuator alert = new Actuator("halm-" + id, userId, appId, "ELECTRICITY-MONITOR");
         actuators.add(alert);
-        alert.setGatewayDeviceId(motionDetection.getId());
+        alert.setGatewayDeviceId(electricityDetection.getId());
         alert.setLatency(1.0);
 
         FogDevice analogValueMeter = addAnalogValueMeter(id, userId, appId, router.getId()); // adding an analogValueMeter to the physical topology
@@ -211,10 +211,10 @@ public class AdvanceMeteringInfrastructure {
             sensors.add(sensor);
         }
 
-        Actuator impactActuator = new Actuator("imp-" + id, userId, appId, "ANALOG_VALUE_MONITOR");
-        actuators.add(impactActuator);
-        impactActuator.setGatewayDeviceId(analogValueMeter.getId());
-        impactActuator.setLatency(1.0);  // latency of connection between impact alert actuator and the parent device is 1 ms
+        Actuator analogValueActuator = new Actuator("imp-" + id, userId, appId, "ANALOG_VALUE_MONITOR");
+        actuators.add(analogValueActuator);
+        analogValueActuator.setGatewayDeviceId(analogValueMeter.getId());
+        analogValueActuator.setLatency(1.0);  // latency of connection between analogValue alert actuator and the parent device is 1 ms
         return analogValueMeter;
     }
 
@@ -260,7 +260,7 @@ public class AdvanceMeteringInfrastructure {
         Sensor sensor = new Sensor("bs-" + id, "ELECTRICITY", userId, appId, new DeterministicDistribution(5)); // inter-transmission time follows a deterministic distribution
         sensors.add(sensor);
         sensor.setGatewayDeviceId(electricitySensorDevice.getId());
-        sensor.setLatency(1.0);  // latency of connection between HUMIDITY sensor and the parent device is 1 ms
+        sensor.setLatency(1.0);  // latency of connection between ELECTRICITY sensor and the parent device is 1 ms
     }
 
     /**
@@ -331,7 +331,7 @@ public class AdvanceMeteringInfrastructure {
     }
 
     /**
-     * Function to create the Precision Agriculture Quality Control application in the DDF model.
+     * Function to create the Advanced Metering Infrastructure application in the DDF model.
      *
      * @param appId  unique identifier of the application
      * @param userId identifier of the user of the application
